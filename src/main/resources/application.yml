@@ -1,0 +1,41 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/health?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+    username: ${DB_USER:health_user}
+    password: ${DB_PASSWORD:health1234}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      acks: all
+      retries: 1
+      properties:
+        delivery.timeout.ms: 3000
+        request.timeout.ms: 1000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info"
+
+healthcheck:
+  kafka:
+    send-test-message: ${KAFKA_HEALTHCHECK_SEND:false}
+    test-topic: ${KAFKA_HEALTHCHECK_TOPIC:healthcheck}
+    timeout-ms: ${KAFKA_HEALTHCHECK_TIMEOUT_MS:1000}
