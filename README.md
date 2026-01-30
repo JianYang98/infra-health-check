@@ -10,19 +10,19 @@ Docker 기반 환경에서 인프라를 구성하고, Spring Boot 애플리케�
 
 프로젝트를 클론한 후 프로젝트 루트 디렉토리로 이동합니다.
 
-### 1 — Full Docker Environment
+### 1 -2 Full Docker Environment
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.app.yml up -d --build
 ```
-### 2 - Infra + Local App (Dev Mode)
+### 1-2 Infra + Local App (Dev Mode)
 
 ```bash
 docker compose up -d
 ./gradlew bootRun
 ```
 
-### 3 Health Check
+### 2 Health Check
 애플리케이션 실행 후 아래 endpoint로 상태를 확인할 수 있습니다.
 ```bash
 http://localhost:8080/health
