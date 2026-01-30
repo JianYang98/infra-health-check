@@ -1,0 +1,27 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: infra-health-check
+    restart: always
+    depends_on:
+      - mysql
+      - redis
+      - kafka
+    ports:
+      - "${SERVER_PORT:-8080}:8080"
+    environment:
+      SERVER_PORT: "8080"
+
+      MYSQL_HOST: "mysql"
+      MYSQL_PORT: "3306"
+      MYSQL_DB: ${MYSQL_DB:-health}
+      MYSQL_USER: ${MYSQL_USER:-health_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-health1234}
+
+      REDIS_HOST: "redis"
+      REDIS_PORT: "6379"
+
+      KAFKA_BOOTSTRAP_SERVERS: "kafka:29092"
+      KAFKA_CLIENT_ID: ${KAFKA_CLIENT_ID:-infra-health-check}
