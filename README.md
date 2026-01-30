@@ -33,7 +33,4 @@ http://localhost:8080/health
 - Gradle
 - MySQL, Redis, Kafka
 
-## Run
-```powershell
-./gradlew bootRun
-```
+ 
