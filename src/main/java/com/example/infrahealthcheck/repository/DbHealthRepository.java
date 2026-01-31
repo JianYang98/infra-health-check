@@ -2,6 +2,7 @@ package com.example.infrahealthcheck.repository;
 
 import com.example.infrahealthcheck.model.HealthCheckStatus;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import javax.sql.DataSource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -13,11 +14,12 @@ public class DbHealthRepository {
 
     public HealthCheckStatus check() {
         long start = System.nanoTime();
-        try (Connection connection = dataSource.getConnection()) {
-            boolean valid = connection.isValid(2);
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement("SELECT 1")) {
+            statement.execute();
             return HealthCheckStatus.builder()
-                .status(valid ? "UP" : "DOWN")
-                .details(valid ? "MySQL connection OK" : "MySQL connection invalid")
+                .status("UP")
+                .details("MySQL query OK")
                 .responseTimeMs(elapsedMs(start))
                 .build();
         } catch (Exception ex) {

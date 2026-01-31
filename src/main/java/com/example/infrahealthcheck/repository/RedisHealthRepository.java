@@ -13,16 +13,14 @@ public class RedisHealthRepository {
 
     public HealthCheckStatus check() {
         long start = System.nanoTime();
-        try {
-            try (RedisConnection connection = redisTemplate.getConnectionFactory().getConnection()) {
-                String pong = connection.ping();
-                boolean ok = "PONG".equalsIgnoreCase(pong);
-                return HealthCheckStatus.builder()
-                    .status(ok ? "UP" : "DOWN")
-                    .details(ok ? "Redis PONG" : "Redis ping failed")
-                    .responseTimeMs(elapsedMs(start))
-                    .build();
-            }
+        try (RedisConnection connection = redisTemplate.getConnectionFactory().getConnection()) {
+            String pong = connection.ping();
+            boolean ok = pong != null && !pong.isBlank();
+            return HealthCheckStatus.builder()
+                .status(ok ? "UP" : "DOWN")
+                .details(ok ? "Redis PONG" : "Redis ping failed")
+                .responseTimeMs(elapsedMs(start))
+                .build();
         } catch (Exception ex) {
             return HealthCheckStatus.builder()
                 .status("DOWN")

@@ -27,6 +27,12 @@ docker compose up -d
 ```bash
 http://localhost:8080/health
 ```
+### 3 Test
+```bash
+./gradlew test
+```
+Testcontainers가 테스트용 MySQL, Redis, Kafka를 자동으로 띄웁니다.
+
 ## Stack
 - Java 17
 - Spring Boot 3.x
