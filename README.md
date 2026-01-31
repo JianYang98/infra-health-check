@@ -31,7 +31,7 @@ http://localhost:8080/health
 ```bash
 ./gradlew test
 ```
-Testcontainers가 테스트용 MySQL, Redis, Kafka를 자동으로 띄웁니다.
+Testcontainers가 테스트용 MySQL, Redis, Kafka를 자동으로 띄우고 테스트 합니다.
 
 ## Stack
 - Java 17
