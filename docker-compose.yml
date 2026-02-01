@@ -1,4 +1,31 @@
 services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: infra-health-check
+    restart: always
+    depends_on:
+      - mysql
+      - redis
+      - kafka
+    ports:
+      - "${SERVER_PORT:-8080}:8080"
+    environment:
+      SERVER_PORT: "8080"
+
+      MYSQL_HOST: "mysql"
+      MYSQL_PORT: "3306"
+      MYSQL_DB: ${MYSQL_DB:-health}
+      MYSQL_USER: ${MYSQL_USER:-health_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-health1234}
+
+      REDIS_HOST: "redis"
+      REDIS_PORT: "6379"
+
+      KAFKA_BOOTSTRAP_SERVERS: "kafka:29092"
+      KAFKA_CLIENT_ID: ${KAFKA_CLIENT_ID:-infra-health-check}
+
   mysql:
     image: mysql:8.0
     container_name: mysql8
@@ -23,39 +50,33 @@ services:
     volumes:
       - redis_data:/data
 
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.5.0
-    container_name: zookeeper
-    restart: always
-    ports:
-      - "2181:2181"
-    environment:
-      ZOOKEEPER_CLIENT_PORT: "2181"
-      ZOOKEEPER_TICK_TIME: "2000"
-
   kafka:
     image: confluentinc/cp-kafka:7.5.0
     container_name: kafka
     restart: always
-    depends_on:
-      - zookeeper
     ports:
       - "${KAFKA_PORT:-9092}:9092"
     environment:
-      KAFKA_BROKER_ID: "1"
-      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      # KRaft 모드 설정
+      KAFKA_NODE_ID: "1"
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
+      CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2Qk"
 
-      # 내부(컨테이너들) 29092 / 외부(호스트) 9092
-      KAFKA_LISTENERS: "PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092"
+      # 리스너 설정
+      KAFKA_LISTENERS: "PLAINTEXT://0.0.0.0:29092,CONTROLLER://0.0.0.0:9093,PLAINTEXT_HOST://0.0.0.0:9092"
       KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092"
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT"
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
       KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
 
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
 
+      # 로그 디렉토리
+      KAFKA_LOG_DIRS: "/tmp/kraft-combined-logs"
+
 volumes:
   mysql_data:
   redis_data:
-
